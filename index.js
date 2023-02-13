@@ -15,13 +15,14 @@ if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
     puppeteer = require("puppeteer");
 }
 
-
 if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
     options = {
         args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-    //    executablePath: await chrome.executablePath,
+        defaultViewport: chrome.defaultViewport,
+        executablePath: await chrome.executablePath,
         headless: true,
         ignoreHTTPSErrors: true,
+        timeout: 300000,
     };
 }
 
@@ -30,6 +31,7 @@ if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
 app.listen(3000, () => {
     console.log(`Site : http://localhost:${PORT}/`);
 });
+module.exports = app;
 
 
 app.get('/', (req, res) => {
@@ -70,8 +72,9 @@ app.get('/equipe/:club', (req, res) => {
 const urlClassement = 'https://www.ligue1.fr/classement';
 const selectorClassement = '.GeneralStats-row';
 (async function () {
-    const browser = await puppeteer.launch({timeout: 300000});
-    const page = await browser.newPage();
+    try {
+        let browser = await puppeteer.launch(options);
+        const page = await browser.newPage();
     await page.goto(urlClassement, {timeout: 300000});
     const classement = await page.$$eval(selectorClassement, nodes => {
         return nodes.map(node => {
@@ -84,49 +87,59 @@ const selectorClassement = '.GeneralStats-row';
         })
     });
     fs.writeFile('./JSON/classement.json', JSON.stringify(classement), err => err ? console.log(err) : null)
-    await browser.close();
+    await browser.close()
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
 })();
 
 
 const getJournee = async (j) => {
     let urlJournee = "https://www.ligue1.fr/calendrier-resultats?matchDay=" + j;
     const selectorJournee = ".match-result";
-    const browser = await puppeteer.launch({timeout: 300000});
-    const page = await browser.newPage();
-    await page.goto(urlJournee, {timeout: 300000});
-    const matchs = await page.$$eval(selectorJournee, (nodes, journee) => {
-        return nodes.map(node => {
-            const id = node.querySelector('.result').id;
-            const clubDesktop_domicile = node.querySelector('.calendarTeamNameDesktop').textContent;
-            const clubMobile_domicile = node.querySelector('.calendarTeamNameMobile').textContent;
-            let score_domicile = node.querySelector('.result').textContent.trim().charAt(0);
-            let score_exterieur = node.querySelector('.result').textContent.trim().charAt(2);
-            const clubDesktop_exterieur = node.querySelector('.away .calendarTeamNameDesktop').textContent;
-            const clubMobile_exterieur = node.querySelector('.away .calendarTeamNameMobile').textContent;
+    try {
+        let browser = await puppeteer.launch(options);
+        const page = await browser.newPage();
+        await page.goto(urlJournee, {timeout: 300000});
+        const matchs = await page.$$eval(selectorJournee, (nodes, journee) => {
+            return nodes.map(node => {
+                const id = node.querySelector('.result').id;
+                const clubDesktop_domicile = node.querySelector('.calendarTeamNameDesktop').textContent;
+                const clubMobile_domicile = node.querySelector('.calendarTeamNameMobile').textContent;
+                let score_domicile = node.querySelector('.result').textContent.trim().charAt(0);
+                let score_exterieur = node.querySelector('.result').textContent.trim().charAt(2);
+                const clubDesktop_exterieur = node.querySelector('.away .calendarTeamNameDesktop').textContent;
+                const clubMobile_exterieur = node.querySelector('.away .calendarTeamNameMobile').textContent;
 
-            if (!Number.isInteger(score_domicile) && !Number.isInteger(score_exterieur)) {
-                score_exterieur = null;
-                score_domicile = null;
-            }
+                if (!Number.isInteger(score_domicile) && !Number.isInteger(score_exterieur)) {
+                    score_exterieur = null;
+                    score_domicile = null;
+                }
 
-            return {
-                id,
-                journee,
-                clubDesktop_domicile,
-                clubMobile_domicile,
-                score_domicile,
-                score_exterieur,
-                clubDesktop_exterieur,
-                clubMobile_exterieur
-            };
-        });
-    }, j);
-    fs.writeFile(
-        './JSON/journee' + j + '.json',
-        JSON.stringify(matchs),
-        err => (err ? console.log(err) : null)
-    );
-    await browser.close();
+                return {
+                    id,
+                    journee,
+                    clubDesktop_domicile,
+                    clubMobile_domicile,
+                    score_domicile,
+                    score_exterieur,
+                    clubDesktop_exterieur,
+                    clubMobile_exterieur
+                };
+            });
+        }, j);
+        fs.writeFile(
+            './JSON/journee' + j + '.json',
+            JSON.stringify(matchs),
+            err => (err ? console.log(err) : null)
+        );
+        await browser.close();
+    }
+    catch (err) {
+        console.error(err);
+        return null;
+    }
 };
 
 

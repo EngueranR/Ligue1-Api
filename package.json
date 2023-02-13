@@ -1,18 +1,22 @@
 {
   "name": "api",
-  "version": "0.0.2",
+  "version": "1.0.0",
+  "main": "index.js",
   "dependencies": {
     "chrome-aws-lambda": "^6",
-    "express": "^4.18.2",
+    "express": "^4.18.1",
+    "puppeteer-core": "^6",
     "node-cron": "^3.0.2",
-    "nodemon": "^2.0.20",
-    "puppeteer": "^6"
+    "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "puppeteer": "^16.2.0"
   },
   "engines": {
-    "node": "18.x"
+    "node": "^14"
   },
   "scripts": {
-    "start": "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
