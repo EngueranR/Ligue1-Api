@@ -1,7 +1,5 @@
-import chromium from 'chrome-aws-lambda';
-
 process.setMaxListeners(0);
-
+const chromium = require ('chrome-aws-lambda');
 const puppeteer = require('puppeteer');
 const fs = require("fs")
 const express = require('express');
