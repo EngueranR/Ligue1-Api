@@ -1,10 +1,17 @@
+import chromium from 'chrome-aws-lambda';
+
 process.setMaxListeners(0);
+
 const puppeteer = require('puppeteer');
 const fs = require("fs")
 const express = require('express');
 const app = express();
-//const cron = require("node-cron");
 const PORT = process.env.PORT || 3000;
+//const cron = require("node-cron");
+
+
+// const browser = await puppeteer.launch( { args: ['--no-sandbox'] } );
+
 
 // cron.schedule(' */5 * * * *', () => {
 
@@ -51,7 +58,14 @@ app.get('/equipe/:club', (req, res) => {
 const urlClassement = 'https://www.ligue1.fr/classement';
 const selectorClassement = '.GeneralStats-row';
 (async function () {
-    const browser = await puppeteer.launch({timeout: 300000});
+    const browser = await chromium.puppeteer.launch({
+        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: true,
+        ignoreHTTPSErrors: true,
+        timeout: 300000
+    })
     const page = await browser.newPage();
     await page.goto(urlClassement, {timeout: 300000});
     const classement = await page.$$eval(selectorClassement, nodes => {
@@ -72,7 +86,14 @@ const selectorClassement = '.GeneralStats-row';
 const getJournee = async (j) => {
     let urlJournee = "https://www.ligue1.fr/calendrier-resultats?matchDay=" + j;
     const selectorJournee = ".match-result";
-    const browser = await puppeteer.launch({timeout: 300000});
+    const browser = await chromium.puppeteer.launch({
+        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: true,
+        ignoreHTTPSErrors: true,
+        timeout: 300000
+    })
     const page = await browser.newPage();
     await page.goto(urlJournee, {timeout: 300000});
     const matchs = await page.$$eval(selectorJournee, (nodes, journee) => {
