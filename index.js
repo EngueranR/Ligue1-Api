@@ -1,15 +1,29 @@
 process.setMaxListeners(0);
-const chromium = require ('chrome-aws-lambda');
-const puppeteer = require('puppeteer');
+
+let chrome = {};
+let puppeteer;
 const fs = require("fs")
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 //const cron = require("node-cron");
 
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    chrome = require("chrome-aws-lambda");
+    puppeteer = require("puppeteer-core");
+} else {
+    puppeteer = require("puppeteer");
+}
 
-// const browser = await puppeteer.launch( { args: ['--no-sandbox'] } );
 
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    options = {
+        args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+        executablePath: await chrome.executablePath,
+        headless: true,
+        ignoreHTTPSErrors: true,
+    };
+}
 
 // cron.schedule(' */5 * * * *', () => {
 
@@ -56,14 +70,7 @@ app.get('/equipe/:club', (req, res) => {
 const urlClassement = 'https://www.ligue1.fr/classement';
 const selectorClassement = '.GeneralStats-row';
 (async function () {
-    const browser = await chromium.puppeteer.launch({
-        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath,
-        headless: true,
-        ignoreHTTPSErrors: true,
-        timeout: 300000
-    })
+    const browser = await puppeteer.launch({timeout: 300000});
     const page = await browser.newPage();
     await page.goto(urlClassement, {timeout: 300000});
     const classement = await page.$$eval(selectorClassement, nodes => {
@@ -84,14 +91,7 @@ const selectorClassement = '.GeneralStats-row';
 const getJournee = async (j) => {
     let urlJournee = "https://www.ligue1.fr/calendrier-resultats?matchDay=" + j;
     const selectorJournee = ".match-result";
-    const browser = await chromium.puppeteer.launch({
-        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath,
-        headless: true,
-        ignoreHTTPSErrors: true,
-        timeout: 300000
-    })
+    const browser = await puppeteer.launch({timeout: 300000});
     const page = await browser.newPage();
     await page.goto(urlJournee, {timeout: 300000});
     const matchs = await page.$$eval(selectorJournee, (nodes, journee) => {
