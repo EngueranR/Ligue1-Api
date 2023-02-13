@@ -9,10 +9,10 @@
     "puppeteer": "^6"
   },
   "engines": {
-    "node": "18.x"
+    "node": "^14"
   },
   "scripts": {
-    "start": "node index.js"
+    "test": "echo 'index.js'"
   },
   "repository": {
     "type": "git",
