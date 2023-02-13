@@ -1,26 +1,11 @@
 process.setMaxListeners(0);
 
 const fs = require("fs")
-const puppeteer = require('puppeteer-core');
-const chrome = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer');
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 //const cron = require("node-cron");
-
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options = {
-        args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chrome.defaultViewport,
-        executablePath: await chrome.executablePath,
-        headless: true,
-        ignoreHTTPSErrors: true,
-        timeout: 300000,
-    };
-}
-
-
 // cron.schedule(' */5 * * * *', () => {
 
 app.listen(3000, () => {
@@ -68,15 +53,7 @@ const urlClassement = 'https://www.ligue1.fr/classement';
 const selectorClassement = '.GeneralStats-row';
 (async function () {
     try {
-        const browser = await puppeteer.launch(
-            process.env.NODE_ENV === 'production'
-                ? {
-                    args: chrome.args,
-                    executablePath: await chrome.executablePath,
-                    headless: chrome.headless,
-                }
-                : {}
-        );
+        let browser = await puppeteer.launch({timeout: 300000});
         const page = await browser.newPage();
         await page.goto(urlClassement, {timeout: 300000});
         const classement = await page.$$eval(selectorClassement, nodes => {
@@ -102,15 +79,9 @@ const getJournee = async (j) => {
     let urlJournee = "https://www.ligue1.fr/calendrier-resultats?matchDay=" + j;
     const selectorJournee = ".match-result";
     try {
-        const browser = await puppeteer.launch(
-            process.env.NODE_ENV === 'production'
-                ? {
-                    args: chrome.args,
-                    executablePath: await chrome.executablePath,
-                    headless: chrome.headless,
-                }
-                : {}
-        );
+        let browser = await puppeteer.launch({timeout: 300000});
+
+
         const page = await browser.newPage();
         await page.goto(urlJournee, {timeout: 300000});
         const matchs = await page.$$eval(selectorJournee, (nodes, journee) => {
