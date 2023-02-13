@@ -19,7 +19,7 @@ if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
 if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
     options = {
         args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-        executablePath: await chrome.executablePath,
+    //    executablePath: await chrome.executablePath,
         headless: true,
         ignoreHTTPSErrors: true,
     };
