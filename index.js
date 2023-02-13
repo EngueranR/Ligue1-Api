@@ -75,19 +75,19 @@ const selectorClassement = '.GeneralStats-row';
     try {
         let browser = await puppeteer.launch(options);
         const page = await browser.newPage();
-    await page.goto(urlClassement, {timeout: 300000});
-    const classement = await page.$$eval(selectorClassement, nodes => {
-        return nodes.map(node => {
-            const position = node.querySelector('.GeneralStats-item--position').textContent;
-            const clubDesktop = node.querySelector('.GeneralStats-clubName.desktop-item').textContent;
-            const clubMobile = node.querySelector('.GeneralStats-clubName.mobile-item').textContent;
-            //const img = node.querySelector('img').getAttribute('src');
-            const points = node.querySelector('.GeneralStats-item--points').textContent;
-            return {position, clubDesktop, clubMobile, points}
-        })
-    });
-    fs.writeFile('./JSON/classement.json', JSON.stringify(classement), err => err ? console.log(err) : null)
-    await browser.close()
+        await page.goto(urlClassement, {timeout: 300000});
+        const classement = await page.$$eval(selectorClassement, nodes => {
+            return nodes.map(node => {
+                const position = node.querySelector('.GeneralStats-item--position').textContent;
+                const clubDesktop = node.querySelector('.GeneralStats-clubName.desktop-item').textContent;
+                const clubMobile = node.querySelector('.GeneralStats-clubName.mobile-item').textContent;
+                //const img = node.querySelector('img').getAttribute('src');
+                const points = node.querySelector('.GeneralStats-item--points').textContent;
+                return {position, clubDesktop, clubMobile, points}
+            })
+        });
+        fs.writeFile('./JSON/classement.json', JSON.stringify(classement), err => err ? console.log(err) : null)
+        await browser.close()
     } catch (err) {
         console.error(err);
         return null;
