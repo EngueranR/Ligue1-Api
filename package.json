@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "apiLocal.js",
   "dependencies": {
     "cli-progress": "^3.11.2",
@@ -13,7 +13,7 @@
     "node": "^16"
   },
   "scripts": {
-    "start": "node apiVps.js"
+    "start": "node apiLocal.js"
   },
   "repository": {
     "type": "git",
